@@ -25,6 +25,7 @@ FILE_LICENCE ( GPL2_OR_LATER );
  * Transport Layer Security Protocol
  */
 
+#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -754,6 +755,8 @@ struct tls_cipher_suite tls_cipher_suite_null = {
 static struct tls_cipher_suite *
 tls_find_cipher_suite ( unsigned int cipher_suite ) {
 	struct tls_cipher_suite *suite;
+
+	printf("looking for cipher suite code %d", cipher_suite);
 
 	/* Identify cipher suite */
 	for_each_table_entry ( suite, TLS_CIPHER_SUITES ) {
@@ -2167,6 +2170,7 @@ static int tls_new_record ( struct tls_connection *tls, unsigned int type,
 		       "type %d\n", tls, type );
 		return -ENOMEM_RX_CONCAT;
 	}
+
 
 	/* Determine handler */
 	switch ( type ) {

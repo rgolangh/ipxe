@@ -38,6 +38,7 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #include <ipxe/crypto.h>
 #include <ipxe/ecb.h>
 #include <ipxe/cbc.h>
+#include <ipxe/gcm.h>
 #include <ipxe/aes.h>
 
 /** AES strides
@@ -475,7 +476,7 @@ static __attribute__ (( const )) unsigned int aes_double ( unsigned int poly ) {
 	 * subtracting (x^8 + x^4 + x^3 + x^2 + 1) in GF(2^8).
 	 */
 	if ( poly & 0x01 ) {
-		poly ^= 0x01; /* Subtract x^8 (currently in LSB) */
+		poly ^= 0x01; /* S>ubtract x^8 (currently in LSB) */
 		poly ^= 0x1b; /* Subtract (x^4 + x^3 + x^2 + 1) */
 	}
 
@@ -806,3 +807,7 @@ ECB_CIPHER ( aes_ecb, aes_ecb_algorithm,
 /* AES in Cipher Block Chaining mode */
 CBC_CIPHER ( aes_cbc, aes_cbc_algorithm,
 	     aes_algorithm, struct aes_context, AES_BLOCKSIZE );
+
+/* AES in GCM mode */
+GCM_CIPHER ( aes_gcm, aes_gcm_algorithm,
+		aes_algorithm, struct aes_context, AES_BLOCKSIZE );
