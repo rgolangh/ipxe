@@ -50,7 +50,7 @@ extern void gcm_decrypt ( void *ctx, const void *src, void *dst,
 			  void *gcm_ctx );
 
 /**
- * Create a cipher-block chaining mode of behaviour of an existing cipher
+ * Create a GCM behaviour of an existing cipher
  *
  * @v _gcm_name		Name for the new GCM cipher
  * @v _gcm_cipher	New cipher algorithm

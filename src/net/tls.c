@@ -25,7 +25,6 @@ FILE_LICENCE ( GPL2_OR_LATER );
  * Transport Layer Security Protocol
  */
 
-#include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -755,9 +754,7 @@ struct tls_cipher_suite tls_cipher_suite_null = {
 static struct tls_cipher_suite *
 tls_find_cipher_suite ( unsigned int cipher_suite ) {
 	struct tls_cipher_suite *suite;
-
-	printf("looking for cipher suite code %d", cipher_suite);
-
+	
 	/* Identify cipher suite */
 	for_each_table_entry ( suite, TLS_CIPHER_SUITES ) {
 		if ( suite->code == cipher_suite )
@@ -840,6 +837,8 @@ static int tls_select_cipher ( struct tls_connection *tls,
 	int rc;
 
 	/* Identify cipher suite */
+	DBGC ( tls, "looking for cipher suite %d\n", cipher_suite);
+
 	suite = tls_find_cipher_suite ( cipher_suite );
 	if ( ! suite ) {
 		DBGC ( tls, "TLS %p does not support cipher %04x\n",
@@ -1062,7 +1061,13 @@ static int tls_send_client_hello ( struct tls_connection *tls ) {
 					uint8_t name[name_len];
 				} __attribute__ (( packed )) list[1];
 			} __attribute__ (( packed )) server_name;
-			uint16_t max_fragment_length_type;
+            uint16_t supported_groups_type;
+            uint16_t supported_groups_len;
+            struct {
+                uint16_t len;
+                uint16_t type[1];
+            } __attribute (( packed )) supported_groups;
+            uint16_t max_fragment_length_type;
 			uint16_t max_fragment_length_len;
 			struct {
 				uint8_t max;
@@ -1103,11 +1108,22 @@ static int tls_send_client_hello ( struct tls_connection *tls ) {
 	memcpy ( hello.session_id, tls->session_id,
 		 sizeof ( hello.session_id ) );
 	hello.cipher_suite_len = htons ( sizeof ( hello.cipher_suites ) );
-	i = 0 ; for_each_table_entry ( suite, TLS_CIPHER_SUITES )
+	i = 0 ; for_each_table_entry ( suite, TLS_CIPHER_SUITES ) {
+		DBGC ( tls, "the suite in the hello record %x %s\n", ntohs(suite->code), suite->cipher->name);
 		hello.cipher_suites[i++] = suite->code;
+	};
 	hello.compression_methods_len = sizeof ( hello.compression_methods );
 	hello.extensions_len = htons ( sizeof ( hello.extensions ) );
-	hello.extensions.server_name_type = htons ( TLS_SERVER_NAME );
+
+    hello.extensions.supported_groups_type
+        = htons( TLS_SUPPORTED_GROUPS_TYPE );
+    hello.extensions.supported_groups_len
+        = htons( sizeof ( hello.extensions.supported_groups ));
+    hello.extensions.supported_groups.len
+        = htons( sizeof ( hello.extensions.supported_groups.type ) );
+    hello.extensions.supported_groups.type[0] = htons(0x001d);
+
+    hello.extensions.server_name_type = htons ( TLS_SERVER_NAME );
 	hello.extensions.server_name_len
 		= htons ( sizeof ( hello.extensions.server_name ) );
 	hello.extensions.server_name.len
@@ -1145,6 +1161,7 @@ static int tls_send_client_hello ( struct tls_connection *tls ) {
 	memcpy ( hello.extensions.session_ticket.data, session->ticket,
 		 sizeof ( hello.extensions.session_ticket.data ) );
 
+	DBGC ( tls, "client hello: before tls send handshake\n" );
 	return tls_send_handshake ( tls, &hello, sizeof ( hello ) );
 }
 
@@ -1535,6 +1552,8 @@ static int tls_new_server_hello ( struct tls_connection *tls,
 	size_t ext_len;
 	size_t remaining;
 	int rc;
+
+	DBGC ( tls, "server hello with ciphers" );
 
 	/* Parse header */
 	if ( ( sizeof ( *hello_a ) > len ) ||
@@ -2556,6 +2575,10 @@ static int tls_new_ciphertext ( struct tls_connection *tls,
 	size_t len = 0;
 	int rc;
 
+
+    DBGC ( tls, "start to decrypt received data with cipher suite name %s cipher code: %d\n", cipherspec->suite->cipher->name, cipherspec->suite->code );
+	DBGC ( tls, "tls header type %d \n", tlshdr->type );
+
 	/* Decrypt the received data */
 	list_for_each_entry ( iobuf, &tls->rx_data, list ) {
 		cipher_decrypt ( cipher, cipherspec->cipher_ctx,
@@ -3014,6 +3037,8 @@ static void tls_tx_step ( struct tls_connection *tls ) {
 			       tls, strerror ( rc ) );
 			goto err;
 		}
+		DBGC ( tls, "after client hello\n" );
+
 		tls->tx_pending &= ~TLS_TX_CLIENT_HELLO;
 	} else if ( tls->tx_pending & TLS_TX_CERTIFICATE ) {
 		/* Send Certificate */
@@ -3185,6 +3210,11 @@ int add_tls ( struct interface *xfer, const char *name,
 	tls_clear_cipher ( tls, &tls->rx_cipherspec );
 	tls_clear_cipher ( tls, &tls->rx_cipherspec_pending );
 	tls->client_random.gmt_unix_time = time ( NULL );
+	DBGC ( tls, "gmt time %d\n", tls->client_random.gmt_unix_time );
+	
+	DBGC ( tls, "tls root cert count %d\n", tls->root->count);
+	DBGC ( tls, "tls version %d\n", tls->version);
+	
 	iob_populate ( &tls->rx_header_iobuf, &tls->rx_header, 0,
 		       sizeof ( tls->rx_header ) );
 	INIT_LIST_HEAD ( &tls->rx_data );

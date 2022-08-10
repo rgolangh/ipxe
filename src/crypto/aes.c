@@ -476,7 +476,7 @@ static __attribute__ (( const )) unsigned int aes_double ( unsigned int poly ) {
 	 * subtracting (x^8 + x^4 + x^3 + x^2 + 1) in GF(2^8).
 	 */
 	if ( poly & 0x01 ) {
-		poly ^= 0x01; /* S>ubtract x^8 (currently in LSB) */
+		poly ^= 0x01; /* Subtract x^8 (currently in LSB) */
 		poly ^= 0x1b; /* Subtract (x^4 + x^3 + x^2 + 1) */
 	}
 

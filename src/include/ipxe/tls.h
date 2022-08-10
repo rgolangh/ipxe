@@ -85,6 +85,7 @@ struct tls_header {
 #define TLS_RSA_WITH_AES_128_CBC_SHA256 0x003c
 #define TLS_RSA_WITH_AES_256_CBC_SHA256 0x003d
 #define TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 0xc02f
+#define TLS_AES_128_GCM_SHA256 0x1301
 
 /* TLS hash algorithm identifiers */
 #define TLS_MD5_ALGORITHM 1
@@ -100,6 +101,8 @@ struct tls_header {
 /* TLS server name extension */
 #define TLS_SERVER_NAME 0
 #define TLS_SERVER_NAME_HOST_NAME 0
+
+#define TLS_SUPPORTED_GROUPS_TYPE 10
 
 /* TLS maximum fragment length extension */
 #define TLS_MAX_FRAGMENT_LENGTH 1

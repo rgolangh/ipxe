@@ -24,10 +24,12 @@
 
 FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 
+#include <stdio.h>
 #include <ipxe/rsa.h>
 #include <ipxe/sha256.h>
 #include <ipxe/asn1.h>
 #include <ipxe/aes.h>
+#include <ipxe/gcm.h>
 #include <byteswap.h>
 
 #include <ipxe/tls.h>
@@ -49,10 +51,10 @@ struct asn1_algorithm sha256_with_rsa_aes128_encryption_algorithm __asn1_algorit
 };
 
 
-/** TLS_RSA_WITH_AES_256_CBC_SHA256 cipher suite */
-struct tls_cipher_suite tls_rsa_with_aes_256_cbc_sha256 __tls_cipher_suite(02)={
+/** TLS_RSA_WITH_AES_256_GCM_SHA256 cipher suite */
+struct tls_cipher_suite tls_rsa_with_aes_128_gcm_sha256 __tls_cipher_suite(04)={
 	.code = htons ( TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 ),
-	.key_len = ( 256 / 8 ),
+	.key_len = ( 128 / 8 ),
 	.pubkey = &rsa_algorithm,
 	.cipher = &aes_gcm_algorithm,
 	.digest = &sha256_algorithm,

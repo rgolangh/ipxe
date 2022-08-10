@@ -29,20 +29,52 @@ FILE_LICENCE ( GPL2_OR_LATER_OR_UBDL );
 #include <ipxe/sha1.h>
 #include <ipxe/tls.h>
 
-/** TLS_RSA_WITH_AES_128_CBC_SHA cipher suite */
-struct tls_cipher_suite tls_rsa_with_aes_128_cbc_sha __tls_cipher_suite (03) = {
-	.code = htons ( TLS_RSA_WITH_AES_128_CBC_SHA ),
-	.key_len = ( 128 / 8 ),
+// /** TLS_RSA_WITH_AES_128_CBC_SHA cipher suite */
+// struct tls_cipher_suite tls_rsa_with_aes_128_cbc_sha __tls_cipher_suite (03) = {
+// 	.code = htons ( TLS_RSA_WITH_AES_128_CBC_SHA ),
+// 	.key_len = ( 128 / 8 ),
+// 	.pubkey = &rsa_algorithm,
+// 	.cipher = &aes_cbc_algorithm,
+// 	.digest = &sha1_algorithm,
+// };
+
+// /** TLS_RSA_WITH_AES_256_CBC_SHA cipher suite */
+// struct tls_cipher_suite tls_rsa_with_aes_256_cbc_sha __tls_cipher_suite (04) = {
+// 	.code = htons ( TLS_RSA_WITH_AES_256_CBC_SHA ),
+// 	.key_len = ( 256 / 8 ),
+// 	.pubkey = &rsa_algorithm,
+// 	.cipher = &aes_cbc_algorithm,
+// 	.digest = &sha1_algorithm,
+// };
+
+/** "sha256WithRSAAESEncryption" object identifier */
+static uint8_t oid_sha256_with_rsa_aes128_encryption[] =
+	{ ASN1_OID_SHA256WITHRSAAES128ENCRYPTION };
+
+/** "sha256WithRSAAES128Encryption" OID-identified algorithm */
+struct asn1_algorithm sha256_with_rsa_aes128_encryption_algorithm __asn1_algorithm = {
+	.name = "sha256WithRSAAES128Encryption",
 	.pubkey = &rsa_algorithm,
-	.cipher = &aes_cbc_algorithm,
-	.digest = &sha1_algorithm,
+	.digest = &sha256_algorithm,
+	.oid = ASN1_CURSOR ( oid_sha256_with_rsa_aes128_encryption ),
 };
 
-/** TLS_RSA_WITH_AES_256_CBC_SHA cipher suite */
-struct tls_cipher_suite tls_rsa_with_aes_256_cbc_sha __tls_cipher_suite (04) = {
-	.code = htons ( TLS_RSA_WITH_AES_256_CBC_SHA ),
-	.key_len = ( 256 / 8 ),
+
+/** TLS_RSA_WITH_AES_256_GCM_SHA256 cipher suite */
+struct tls_cipher_suite tls_rsa_with_aes_128_gcm_sha256 __tls_cipher_suite(01)={
+	.code = htons ( TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256 ),
+	.key_len = ( 128 / 8 ),
 	.pubkey = &rsa_algorithm,
-	.cipher = &aes_cbc_algorithm,
-	.digest = &sha1_algorithm,
+	.cipher = &aes_gcm_algorithm,
+	.digest = &sha256_algorithm,
+
 };
+
+///** TLS_RSA_WITH_AES_256_GCM_SHA256 cipher suite */
+//struct tls_cipher_suite tls_aes_128_gcm_sha256 __tls_cipher_suite(02)={
+//	.code = htons ( TLS_AES_128_GCM_SHA256 ),
+//	.key_len = ( 128 / 8 ),
+//	.pubkey = &rsa_algorithm,
+//	.cipher = &aes_gcm_algorithm,
+//	.digest = &sha256_algorithm,
+//};
